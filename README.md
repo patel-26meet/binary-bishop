@@ -1,4 +1,4 @@
 # binary-bishop
 
-this is a chess bot, currently very very stupid - not even 500 elo yet...
-will get better hopefully...
+this is a chess bot, 
+not so stupid anymore, is now about ~1300 elo, (defeated me once :) )
