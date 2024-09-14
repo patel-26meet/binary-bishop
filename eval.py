@@ -178,7 +178,6 @@ class Valuation:
 
                     piece_eval = mg_value * (24 - game_phase) + eg_value * game_phase
                     evaluation += piece_eval if piece.color == chess.WHITE else -piece_eval
-                    #evaluation += piece_value + pos_value if piece.color == chess.WHITE else -piece_value - pos_value
 
             return evaluation // 24
         except Exception as e:
@@ -195,6 +194,17 @@ class Valuation:
                     game_phase += game_phase_table[piece.piece_type]
             
         return game_phase
+    
+
+
+class SpecificValuation(Valuation):
+    def __init__(self):
+        super().__init__()
+        
+    def evaluate(self, board):
+        evaluation =  super().evaluate(board)
+
+        return evaluation 
 
 
 

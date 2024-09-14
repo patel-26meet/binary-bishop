@@ -147,7 +147,7 @@ class UCIEngine:
             depth = 4
 
             if game_phase < 12:
-                depth = 4
+                depth = 5
             elif game_phase > 12 & game_phase < 18:
                 depth = 6
             elif game_phase > 18:
