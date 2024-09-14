@@ -8,21 +8,20 @@ class TranspositionTable:
     def store(self, zobrist_key, depth_searched, score, flag, best_move):
         self.stores += 1
         index = zobrist_key % self.size
-        entry = {
-            'key': zobrist_key,
-            'depth-searched': depth_searched,  # Note the underscore here
-            'score': score,
-            'flag': flag,
-            'best_move': best_move
-        }
-        self.table[index] = entry
+        self.table[index] = (zobrist_key, depth_searched, score, flag, best_move)
 
     def lookup(self, zobrist_key):
         index = zobrist_key % self.size
         entry = self.table[index]
-        if entry and entry['key'] == zobrist_key:
+        if entry and entry[0] == zobrist_key:
             self.hits += 1
-            return entry
+            return {
+                'key': entry[0],
+                'depth_searched': entry[1],
+                'socre':entry[2],
+                'flag': entry[3],
+                'best_move': entry[4]
+            }
         return None
 
     def get_stats(self):

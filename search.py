@@ -82,9 +82,7 @@ class Search:
                 return tt_entry['score']
 
         if depthleft == 0 or board.is_game_over():
-            evaluation = self.valuation.evaluate(board)
-            logging.debug(f"Reached leaf node with eval: {evaluation}")
-            return evaluation
+            return self.quiescence_search(board, alpha, beta, zobrist_key, 4)
         
         bestValue = float('-inf')
         best_move = None
@@ -128,10 +126,8 @@ class Search:
                 return tt_entry['score']
             
         if depthleft == 0 or board.is_game_over():
-            evaluation = self.valuation.evaluate(board)
-            logging.debug(f"Reached leaf node with eval: {evaluation}")
-            return evaluation
-        
+            return self.quiescence_search(board, alpha, beta, zobrist_key, 4)
+
         bestValue = float('inf')
         best_move = None
 
@@ -157,3 +153,28 @@ class Search:
         self.tt.store(zobrist_key, depthleft, bestValue, flag, best_move)
 
         return bestValue
+    
+    def quiescence_search(self, board, alpha, beta, zobrist_key, depth=4):
+        if depth <= 0:
+            return self.valuation.evaluate(board)
+
+        stand_pat = self.valuation.evaluate(board)
+
+        if stand_pat >= beta:
+            return beta
+        if alpha < stand_pat:
+            alpha = stand_pat
+
+        for move in board.legal_moves:
+            if move.is_capture() or self.is_check_or_promotion(board, move):
+                new_board = board.copy()
+                new_board.push(move)
+                new_key = self.zobrist.update_hash(zobrist_key, move, board)
+                score = -self.quiescence_search(new_board, -beta, -alpha, new_key, depth - 1)
+
+                if score >= beta:
+                    return beta
+                if score > alpha:
+                    alpha = score
+
+        return alpha
