@@ -7,7 +7,7 @@ def setup_logging():
     logger.setLevel(logging.DEBUG)
 
     # Create a rotating file handler
-    handler = RotatingFileHandler('./logs/game.log', maxBytes=10*1024*1024, backupCount=1)
+    handler = RotatingFileHandler('./game.log', maxBytes=10*1024*1024, backupCount=1)
     handler.setLevel(logging.DEBUG)
 
     # Create a formatter and add it to the handler

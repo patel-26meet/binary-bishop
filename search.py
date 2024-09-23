@@ -1,5 +1,5 @@
 import logging
-from eval import Valuation
+from eval import SpecificValuation
 from log_config import setup_logging
 from zobrist_hash import ZobristHash
 from transposition_table import TranspositionTable
@@ -9,7 +9,7 @@ logger = setup_logging()
 class Search:
     def __init__(self):
         logging.debug("Initializing search class")
-        self.valuation = Valuation()
+        self.valuation = SpecificValuation()
         self.zobrist = ZobristHash()
         self.tt = TranspositionTable(524288)  # Using the size you specified
 
@@ -23,7 +23,7 @@ class Search:
         logging.debug(f"Initial zobrist key for the board: {zobrist_key}")
 
         tt_entry = self.tt.lookup(zobrist_key)
-        if tt_entry and tt_entry['depth-searched'] >= depth:
+        if tt_entry and tt_entry['depth_searched'] >= depth:
             logging.debug(f"TT hit: {tt_entry}")
             return tt_entry['best_move']
 
@@ -71,7 +71,7 @@ class Search:
 
         # Transposition table lookup
         tt_entry = self.tt.lookup(zobrist_key)
-        if tt_entry and tt_entry['depth-searched'] >= depthleft:
+        if tt_entry and tt_entry['depth_searched'] >= depthleft:
             if tt_entry['flag'] == 'EXACT':
                 return tt_entry['score']
             elif tt_entry['flag'] == 'LOWERBOUND':
@@ -115,7 +115,7 @@ class Search:
 
         # Transposition table lookup
         tt_entry = self.tt.lookup(zobrist_key)
-        if tt_entry and tt_entry['depth-searched'] >= depthleft:
+        if tt_entry and tt_entry['depth_searched'] >= depthleft:
             if tt_entry['flag'] == 'EXACT':
                 return tt_entry['score']
             elif tt_entry['flag'] == 'LOWERBOUND':
@@ -126,7 +126,7 @@ class Search:
                 return tt_entry['score']
             
         if depthleft == 0 or board.is_game_over():
-            return self.quiescence_search(board, alpha, beta, zobrist_key, 4)
+            return self.quiescence_search(board, alpha, beta, zobrist_key, 3)
 
         bestValue = float('inf')
         best_move = None
@@ -154,7 +154,7 @@ class Search:
 
         return bestValue
     
-    def quiescence_search(self, board, alpha, beta, zobrist_key, depth=4):
+    def quiescence_search(self, board, alpha, beta, zobrist_key, depth):
         if depth <= 0:
             return self.valuation.evaluate(board)
 
@@ -166,7 +166,7 @@ class Search:
             alpha = stand_pat
 
         for move in board.legal_moves:
-            if move.is_capture() or self.is_check_or_promotion(board, move):
+            if self.is_capture_or_promotion(board, move):
                 new_board = board.copy()
                 new_board.push(move)
                 new_key = self.zobrist.update_hash(zobrist_key, move, board)
@@ -178,3 +178,11 @@ class Search:
                     alpha = score
 
         return alpha
+
+    def is_capture_or_promotion(self, board, move):
+        return board.is_capture(move) or move.promotion is not None
+
+    def is_check_or_promotion(self, board, move):
+        new_board = board.copy()
+        new_board.push(move)
+        return new_board.is_check() or move.promotion is not None

@@ -27,7 +27,7 @@ class CurrentPos:
 
 
 #check castling and en passant in hashing
-board = chess.Board('r1bqk2r/1ppp1ppp/2n2n2/2b1p3/pPB1P3/P1P2N2/3P1PPP/RNBQ1RK1 b kq b3 0 7')
+board = chess.Board('4R3/2kn2bp/P5p1/1P2p3/8/2P2p2/8/2K3B1 w - - 0 1')
 
 zobrist = ZobristHash()
 hash = zobrist.compute_initial_hash(board)

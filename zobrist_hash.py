@@ -38,9 +38,7 @@ class ZobristHash:
         ]
 
     def compute_initial_hash(self, board: chess.Board) -> int:
-        logging.debug("entered zobrist initial computation")
         hash_value = 0
-        logging.info(f"hash_value: {hash_value}")
 
         # Hash in all pieces on the board
         for square in chess.SQUARES:
@@ -66,8 +64,6 @@ class ZobristHash:
         # Hash in side to move
         if board.turn == chess.BLACK:
             hash_value ^= self.zobrist_black_to_move
-
-        logging.debug(f"final zobrist hash for the board: {hash_value}")
 
         return hash_value
 

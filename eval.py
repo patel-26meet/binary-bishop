@@ -132,6 +132,22 @@ eg_table = [
     k_eg, 
 ]
 
+#Midgame mobility values of minor adn major pieces; based on number of squares controlling!
+mobility_mg = [
+    [-62,-53,-12,-4,3,13,22,28,33],  #Knight
+    [-48,-20,16,26,38,51,55,63,63,68,81,81,91,98],  #Bishop
+    [-58,-27,-15,-10,-5,-2,9,16,30,29,32,38,46,48,58],  #Rook
+    [-39,-21,3,3,14,22,28,41,43,48,56,60,60,66,67,70,71,73,79,88,88,99,102,102,106,109,113,116]  #Queen
+]
+
+#Endgame mobility values of major and minor pieces 
+mobility_eg = [
+    [-81,-56,-30,-14,8,15,23,27,33],  #Knight
+    [-59,-23,-3,13,24,42,54,57,65,73,78,86,88,97],  #Bishop
+    [-76,-18,28,55,69,82,112,118,132,142,155,165,166,169,171],  #Rook
+    [-36,-15,8,18,34,54,61,73,79,92,94,104,113,120,123,126,133,136,140,143,148,166,170,175,184,191,206,212]  #Queen
+]
+
 class Valuation:
     def __init__(self):
         logging.debug("Initializing Valuation class")
@@ -204,7 +220,63 @@ class SpecificValuation(Valuation):
     def evaluate(self, board):
         evaluation =  super().evaluate(board)
 
-        return evaluation 
+        mobility_score = self.evaluate_mobility(board)
+        space_score = self.evaluate_space(board)
 
+        evaluation += (mobility_score + space_score)
+
+        return evaluation 
+    
+    def evaluate_mobility(self, board):
+        mobility_score = 0
+        game_phase = self.get_game_phase(board)
+
+        for color in [chess.WHITE, chess.BLACK]:
+            for piece_type in [chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN ]:
+                mobility = self.get_piece_mobility(board, color, piece_type)
+                mg_score = mobility_mg[piece_type - 2][mobility]
+                eg_score = mobility_eg[piece_type - 2][mobility]
+                score = (mg_score * (24 - game_phase) + eg_score * game_phase) // 24
+                mobility_score += score if color == chess.WHITE else -score
+
+        return mobility_score
+    
+    def evaluate_space(self, board):
+        space_score = 0
+        game_phase = self.get_game_phase(board)
+
+        if game_phase >= 12:
+            return 0
+        
+        for color in [chess.WHITE, chess.BLACK]:
+            space = self.get_space_score(board, color)
+            space_score += space if color == chess.WHITE else -space
+
+        return space_score
+    
+    def get_space_score(self, board, color):
+        space = 0
+        behind_pawns = 0
+        center_files = [2, 3, 4, 5]
+
+        pawn_ranks = [1, 2, 3] if color == chess.WHITE else [6, 5, 4]
+
+        for file in center_files:
+            for rank in pawn_ranks:
+                square = chess.square(file, rank)
+                if not board.piece_at(square):
+                    space += 1
+                    if board.piece_at(square + (8 if color == chess.WHITE else -8)) == chess.Piece(chess.PAWN, color):
+                        behind_pawns += 1
+
+        return (space + behind_pawns) * (len(board.pieces(chess.PAWN, color)) - 2) // 4
+    
+    def get_piece_mobility(self, board, color, piece_type):
+        mobility = 0
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece and piece.color == color and piece.piece_type == piece_type:
+                mobility += len(list(board.attacks(square)))
+        return min(mobility, len(mobility_mg[piece_type - 2]) - 1)
 
 

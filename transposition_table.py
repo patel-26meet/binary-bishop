@@ -18,7 +18,7 @@ class TranspositionTable:
             return {
                 'key': entry[0],
                 'depth_searched': entry[1],
-                'socre':entry[2],
+                'score':entry[2],
                 'flag': entry[3],
                 'best_move': entry[4]
             }
